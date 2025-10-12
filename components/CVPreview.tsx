@@ -9,7 +9,7 @@ interface CVPreviewProps {
 }
 
 export const CVPreview = ({ cvData }: CVPreviewProps) => {
-  const { personalInfo, experiences, education } = cvData;
+  const { personalInfo, experiences, education, skills } = cvData;
 
   return (
     <ScrollView style={styles.container}>
@@ -81,10 +81,10 @@ export const CVPreview = ({ cvData }: CVPreviewProps) => {
         )}
 
         {/* Skills */}
-        {cvData.skills.length > 0 && (
+        {skills.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Habilidades</Text>
-            {cvData.skills.map((skill) => (
+            {skills.map((skill) => (
               <View key={skill.id} style={styles.item}>
                 <Text style={styles.itemTitle}>{skill.name}</Text>
                 <Text style={styles.itemSubtitle}>Nivel: {skill.level}</Text>

@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "CV Creator",
+    "name": "Creador de CV",
     "slug": "cv-creator-app",
     "scheme": "cv-creator-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/images/icono.png",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/icono.png",
       "resizeMode": "contain",
-      "backgroundColor": "#3498db"
+      "backgroundColor": "#007AFF"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -45,7 +46,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "22f2984f-f7c6-4876-9189-539be9218e9f"
+        "projectId": "a20a8695-434a-4662-8289-9daa163811af"
       }
     }
   }

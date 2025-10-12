@@ -129,6 +129,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+
       {/* Espacio adicional al final para evitar que el último elemento quede oculto */}
       <View style={styles.bottomSpacer} />
     </ScrollView>
