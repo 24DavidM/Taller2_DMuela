@@ -1,9 +1,8 @@
-// app/personal-info.tsx
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { InputField } from "../components/InputField";
+import { useForm } from "react-hook-form";
+import { ValidatedInput } from "../components/ValidatedInput";
 import { NavigationButton } from "../components/NavigationButton";
 import { useCVContext } from "../context/CVContext";
 import { PersonalInfo } from "../types/cv.types";
@@ -12,19 +11,12 @@ export default function PersonalInfoScreen() {
   const router = useRouter();
   const { cvData, updatePersonalInfo } = useCVContext();
 
-  const [formData, setFormData] = useState<PersonalInfo>(cvData.personalInfo);
+  const { control, handleSubmit } = useForm<PersonalInfo>({
+    defaultValues: cvData.personalInfo,
+  });
 
-  useEffect(() => {
-    setFormData(cvData.personalInfo);
-  }, [cvData.personalInfo]);
-
-  const handleSave = () => {
-    if (!formData.fullName || !formData.email) {
-      Alert.alert("Error", "Por favor completa al menos el nombre y email");
-      return;
-    }
-
-    updatePersonalInfo(formData);
+  const onSubmit = (data: PersonalInfo) => {
+    updatePersonalInfo(data);
     Alert.alert("Éxito", "Información guardada correctamente", [
       { text: "OK", onPress: () => router.back() },
     ]);
@@ -33,48 +25,73 @@ export default function PersonalInfoScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <InputField
+        {/* Nombre completo */}
+        <ValidatedInput
+          name="fullName"
+          control={control}
           label="Nombre Completo *"
           placeholder="Juan Pérez"
-          value={formData.fullName}
-          onChangeText={(text) => setFormData({ ...formData, fullName: text })}
+          rules={{
+            required: "Nombre completo es obligatorio",
+            pattern: {
+              value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+              message: "Solo se permiten letras y espacios",
+            },
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+          }}
         />
 
-        <InputField
+        {/* Email */}
+        <ValidatedInput
+          name="email"
+          control={control}
           label="Email *"
           placeholder="juan@email.com"
-          value={formData.email}
-          onChangeText={(text) => setFormData({ ...formData, email: text })}
           keyboardType="email-address"
-          autoCapitalize="none"
+          rules={{
+            required: "Email es obligatorio",
+            pattern: { value: /^\S+@\S+\.\S+$/, message: "Email inválido" },
+          }}
         />
 
-        <InputField
-          label="Teléfono"
+        {/* Teléfono */}
+        <ValidatedInput
+          name="phone"
+          control={control}
+          label="Teléfono *"
           placeholder="+593 99 999 9999"
-          value={formData.phone}
-          onChangeText={(text) => setFormData({ ...formData, phone: text })}
           keyboardType="phone-pad"
+          rules={{
+            required: "Teléfono es obligatorio",
+            pattern: { value: /^[0-9+]*$/, message: "Solo números y +" },
+            maxLength: { value: 15, message: "Máximo 15 caracteres" },
+          }}
         />
 
-        <InputField
-          label="Ubicación"
+        {/* Ubicación */}
+        <ValidatedInput
+          name="location"
+          control={control}
+          label="Ubicación *"
           placeholder="Quito, Ecuador"
-          value={formData.location}
-          onChangeText={(text) => setFormData({ ...formData, location: text })}
+          rules={{
+            required: "Ubicación es obligatoria",
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+          }}
         />
 
-        <InputField
+        {/* Resumen profesional */}
+        <ValidatedInput
+          name="summary"
+          control={control}
           label="Resumen Profesional"
           placeholder="Describe brevemente tu perfil profesional..."
-          value={formData.summary}
-          onChangeText={(text) => setFormData({ ...formData, summary: text })}
-          multiline
           numberOfLines={4}
-          style={{ height: 100, textAlignVertical: "top" }}
+          inputStyle={{ height: 100, textAlignVertical: "top" }} 
+          rules={{ maxLength: { value: 250, message: "Máximo 250 caracteres" } }}
         />
 
-        <NavigationButton title="Guardar Información" onPress={handleSave} />
+        <NavigationButton title="Guardar Información" onPress={handleSubmit(onSubmit)} />
 
         <NavigationButton
           title="Cancelar"
@@ -87,11 +104,6 @@ export default function PersonalInfoScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  content: {
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  content: { padding: 20 },
 });

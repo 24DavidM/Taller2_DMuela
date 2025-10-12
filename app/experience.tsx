@@ -1,5 +1,3 @@
-// app/experience.tsx
-
 import React, { useState } from "react";
 import {
   View,
@@ -7,63 +5,107 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  TouchableOpacity,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { InputField } from "../components/InputField";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useForm } from "react-hook-form";
+import { ValidatedInput } from "../components/ValidatedInput";
 import { NavigationButton } from "../components/NavigationButton";
 import { useCVContext } from "../context/CVContext";
 import { Experience } from "../types/cv.types";
+
+type FormData = Omit<Experience, "id">;
+
+const monthNames = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
 
 export default function ExperienceScreen() {
   const router = useRouter();
   const { cvData, addExperience, deleteExperience } = useCVContext();
 
-  const [formData, setFormData] = useState<Omit<Experience, "id">>({
-    company: "",
-    position: "",
-    startDate: "",
-    endDate: "",
-    description: "",
-  });
-
-  const handleAdd = () => {
-    if (!formData.company || !formData.position || !formData.startDate) {
-      Alert.alert(
-        "Error",
-        "Por favor completa al menos empresa, cargo y fecha de inicio"
-      );
-      return;
-    }
-
-    const newExperience: Experience = {
-      id: Date.now().toString(),
-      ...formData,
-    };
-
-    addExperience(newExperience);
-
-    // Limpiar formulario
-    setFormData({
+  const { control, handleSubmit, setValue, watch } = useForm<FormData>({
+    defaultValues: {
       company: "",
       position: "",
       startDate: "",
       endDate: "",
       description: "",
-    });
+    },
+  });
 
+  const [pickerField, setPickerField] = useState<"startDate" | "endDate" | null>(null);
+  const [pickerDate, setPickerDate] = useState(new Date());
+
+  const onSubmit = (data: FormData) => {
+    // Validación fechas
+    const today = new Date();
+
+    if (!data.startDate) {
+      Alert.alert("Error", "La fecha de inicio es obligatoria.");
+      return;
+    }
+
+    const [startMonth, startYear] = data.startDate.split(" ");
+    const start = new Date(parseInt(startYear), monthNames.indexOf(startMonth));
+
+    if (start > today) {
+      Alert.alert("Error", "La fecha de inicio no puede ser futura.");
+      return;
+    }
+
+    if (data.endDate) {
+      const [endMonth, endYear] = data.endDate.split(" ");
+      const end = new Date(parseInt(endYear), monthNames.indexOf(endMonth));
+
+      if (end > today) {
+        Alert.alert("Error", "La fecha de fin no puede ser futura.");
+        return;
+      }
+
+      if (end < start) {
+        Alert.alert("Error", "La fecha de fin no puede ser anterior a la fecha de inicio.");
+        return;
+      }
+    }
+
+    // Guardar experiencia
+    addExperience({ id: Date.now().toString(), ...data });
     Alert.alert("Éxito", "Experiencia agregada correctamente");
+
+    // Limpiar formulario
+    setValue("company", "");
+    setValue("position", "");
+    setValue("startDate", "");
+    setValue("endDate", "");
+    setValue("description", "");
   };
 
   const handleDelete = (id: string) => {
     Alert.alert("Confirmar", "¿Estás seguro de eliminar esta experiencia?", [
       { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => deleteExperience(id),
-      },
+      { text: "Eliminar", style: "destructive", onPress: () => deleteExperience(id) },
     ]);
+  };
+
+  const openPicker = (field: "startDate" | "endDate") => {
+    setPickerField(field);
+    setPickerDate(new Date());
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    if (event.type === "dismissed") {
+      setPickerField(null);
+      return;
+    }
+
+    if (selectedDate && pickerField) {
+      const formatted = `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+      setValue(pickerField, formatted);
+      setPickerField(null);
+    }
   };
 
   return (
@@ -71,47 +113,68 @@ export default function ExperienceScreen() {
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Agregar Nueva Experiencia</Text>
 
-        <InputField
+        <ValidatedInput
+          name="company"
+          control={control}
           label="Empresa *"
           placeholder="Nombre de la empresa"
-          value={formData.company}
-          onChangeText={(text) => setFormData({ ...formData, company: text })}
+          rules={{
+            required: "Empresa es obligatoria",
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+            pattern: { value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, message: "Solo se permiten letras y espacios" }
+          }}
         />
-
-        <InputField
+        <ValidatedInput
+          name="position"
+          control={control}
           label="Cargo *"
           placeholder="Tu posición"
-          value={formData.position}
-          onChangeText={(text) => setFormData({ ...formData, position: text })}
+          rules={{
+            required: "Cargo es obligatorio",
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+            pattern: { value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, message: "Solo se permiten letras y espacios" }
+          }}
         />
 
-        <InputField
+        <ValidatedInput
+          name="startDate"
+          control={control}
           label="Fecha de Inicio *"
-          placeholder="Ej: Enero 2020"
-          value={formData.startDate}
-          onChangeText={(text) => setFormData({ ...formData, startDate: text })}
+          placeholder="Selecciona mes y año"
+          editable={false}
+          onFocus={() => openPicker("startDate")}
         />
 
-        <InputField
+        <ValidatedInput
+          name="endDate"
+          control={control}
           label="Fecha de Fin"
-          placeholder="Ej: Diciembre 2023 o 'Actual'"
-          value={formData.endDate}
-          onChangeText={(text) => setFormData({ ...formData, endDate: text })}
+          placeholder="Selecciona mes y año"
+          editable={false}
+          onFocus={() => openPicker("endDate")}
         />
 
-        <InputField
+        <ValidatedInput
+          name="description"
+          control={control}
           label="Descripción"
           placeholder="Describe tus responsabilidades y logros..."
-          value={formData.description}
-          onChangeText={(text) =>
-            setFormData({ ...formData, description: text })
-          }
           multiline
           numberOfLines={4}
-          style={{ height: 100, textAlignVertical: "top" }}
+          inputStyle={{ height: 100, textAlignVertical: "top" }}
+          rules={{ maxLength: { value: 250, message: "Máximo 250 caracteres" } }}
         />
 
-        <NavigationButton title="Agregar Experiencia" onPress={handleAdd} />
+        {pickerField && (
+          <DateTimePicker
+            value={pickerDate}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onDateChange}
+          />
+        )}
+
+        <NavigationButton title="Agregar Experiencia" onPress={handleSubmit(onSubmit)} />
 
         {cvData.experiences.length > 0 && (
           <>
@@ -124,13 +187,8 @@ export default function ExperienceScreen() {
                   <Text style={styles.cardDate}>
                     {exp.startDate} - {exp.endDate || "Actual"}
                   </Text>
+                  {exp.description ? <Text>{exp.description}</Text> : null}
                 </View>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDelete(exp.id)}
-                >
-                  <Text style={styles.deleteButtonText}>✕</Text>
-                </TouchableOpacity>
               </View>
             ))}
           </>

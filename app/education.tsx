@@ -1,64 +1,31 @@
-// app/education.tsx
-
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import React from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { InputField } from "../components/InputField";
-import { NavigationButton } from "../components/NavigationButton";
 import { useCVContext } from "../context/CVContext";
 import { Education } from "../types/cv.types";
+import { NavigationButton } from "../components/NavigationButton";
+import { ValidatedInput } from "../components/ValidatedInput";
+import { useForm } from "react-hook-form";
 
 export default function EducationScreen() {
   const router = useRouter();
   const { cvData, addEducation, deleteEducation } = useCVContext();
 
-  const [formData, setFormData] = useState<Omit<Education, "id">>({
-    institution: "",
-    degree: "",
-    field: "",
-    graduationYear: "",
+  const currentYear = new Date().getFullYear();
+
+  const { control, handleSubmit, reset } = useForm<Omit<Education, "id">>({
+    defaultValues: { institution: "", degree: "", field: "", graduationYear: "" },
   });
 
-  const handleAdd = () => {
-    if (!formData.institution || !formData.degree) {
-      Alert.alert("Error", "Por favor completa al menos institución y título");
-      return;
-    }
-
-    const newEducation: Education = {
-      id: Date.now().toString(),
-      ...formData,
-    };
-
-    addEducation(newEducation);
-
-    // Limpiar formulario
-    setFormData({
-      institution: "",
-      degree: "",
-      field: "",
-      graduationYear: "",
-    });
-
-    Alert.alert("Éxito", "Educación agregada correctamente");
+  const onSubmit = (data: Omit<Education, "id">) => {
+    addEducation({ id: Date.now().toString(), ...data });
+    reset();
+    alert("Educación agregada correctamente");
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert("Confirmar", "¿Estás seguro de eliminar esta educación?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => deleteEducation(id),
-      },
-    ]);
+    const confirmed = confirm("¿Estás seguro de eliminar esta educación?");
+    if (confirmed) deleteEducation(id);
   };
 
   return (
@@ -66,40 +33,60 @@ export default function EducationScreen() {
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Agregar Nueva Educación</Text>
 
-        <InputField
+        <ValidatedInput
+          name="institution"
+          control={control}
           label="Institución *"
           placeholder="Nombre de la universidad/institución"
-          value={formData.institution}
-          onChangeText={(text) =>
-            setFormData({ ...formData, institution: text })
-          }
+          rules={{
+            required: "Institución es obligatoria",
+            pattern: {
+              value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+              message: "Solo se permiten letras y espacios",
+            },
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+          }}
         />
 
-        <InputField
+        <ValidatedInput
+          name="degree"
+          control={control}
           label="Título/Grado *"
           placeholder="Ej: Licenciatura, Maestría"
-          value={formData.degree}
-          onChangeText={(text) => setFormData({ ...formData, degree: text })}
+          rules={{
+            required: "Título es obligatorio",
+            maxLength: { value: 50, message: "Máximo 50 caracteres" },
+          }}
         />
 
-        <InputField
+        <ValidatedInput
+          name="field"
+          control={control}
           label="Área de Estudio"
           placeholder="Ej: Ingeniería en Sistemas"
-          value={formData.field}
-          onChangeText={(text) => setFormData({ ...formData, field: text })}
+          multiline
+          numberOfLines={3}
+          rules={{
+            maxLength: { value: 250, message: "Máximo 250 caracteres" },
+            required: { value: true, message: "Área de estudio es obligatoria" },
+          }}
         />
 
-        <InputField
+        <ValidatedInput
+          name="graduationYear"
+          control={control}
           label="Año de Graduación"
           placeholder="Ej: 2023"
-          value={formData.graduationYear}
-          onChangeText={(text) =>
-            setFormData({ ...formData, graduationYear: text })
-          }
           keyboardType="numeric"
+          rules={{
+            pattern: { value: /^\d+$/, message: "Debe ser un número" },
+            max: { value: currentYear, message: `No puede ser mayor a ${currentYear}` },
+            required: { value: true, message: "Año de graduación es obligatoria" },
+
+          }}
         />
 
-        <NavigationButton title="Agregar Educación" onPress={handleAdd} />
+        <NavigationButton title="Agregar Educación" onPress={handleSubmit(onSubmit)} />
 
         {cvData.education.length > 0 && (
           <>
@@ -133,6 +120,7 @@ export default function EducationScreen() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
