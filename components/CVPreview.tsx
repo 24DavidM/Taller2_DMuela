@@ -79,6 +79,19 @@ export const CVPreview = ({ cvData }: CVPreviewProps) => {
             ))}
           </View>
         )}
+
+        {/* Skills */}
+        {cvData.skills.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Habilidades</Text>
+            {cvData.skills.map((skill) => (
+              <View key={skill.id} style={styles.item}>
+                <Text style={styles.itemTitle}>{skill.name}</Text>
+                <Text style={styles.itemSubtitle}>Nivel: {skill.level}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </ScrollView>
   );

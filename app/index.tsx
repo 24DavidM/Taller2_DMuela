@@ -102,6 +102,22 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Sección: Habilidades */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>4. Habilidades</Text>
+        <Text style={styles.status}>
+          {cvData.skills.length > 0
+            ? `✓ ${cvData.skills.length} agregada(s)`
+            : "Pendiente"}
+        </Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/skill")}
+        >
+          <Text style={styles.buttonText}>Agregar</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Botón de Vista Previa - Más grande y visible */}
       <View style={styles.previewSection}>
         <TouchableOpacity
@@ -109,7 +125,6 @@ export default function HomeScreen() {
           onPress={() => router.push("/preview")}
           activeOpacity={0.8}
         >
-          <Text style={styles.previewButtonIcon}>👁️</Text>
           <Text style={styles.previewButtonText}>Ver Vista Previa del CV</Text>
         </TouchableOpacity>
       </View>
@@ -127,7 +142,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingBottom: 40, // Espacio extra al final
+    paddingBottom: 40,
   },
   title: {
     fontSize: 24,

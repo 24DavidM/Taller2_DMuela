@@ -8,6 +8,17 @@ export interface PersonalInfo {
   summary: string;
   profileImage?: string; 
 }
+export enum LevelSkill{
+  BASIC = "Básico",
+  INTERMEDIATE = "Intermedio",
+  ADVANCED = "Avanzado",
+  EXPERT = "Experto"
+}
+export interface Skill{
+  id: string;
+  name: string;
+  level: LevelSkill;
+}
 
 export interface Experience {
   id: string;
@@ -30,4 +41,5 @@ export interface CVData {
   personalInfo: PersonalInfo;
   experiences: Experience[];
   education: Education[];
+  skills: Skill[];
 }

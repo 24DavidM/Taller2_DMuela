@@ -2,6 +2,7 @@
   "expo": {
     "name": "CV Creator",
     "slug": "cv-creator-app",
+    "scheme": "cv-creator-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
