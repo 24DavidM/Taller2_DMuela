@@ -1,59 +1,37 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
 
 interface NavigationButtonProps {
   title: string;
   onPress: () => void;
   variant?: "primary" | "secondary" | "danger";
-  style?: ViewStyle;
+  className?: string;
 }
 
 export const NavigationButton = ({
   title,
   onPress,
   variant = "primary",
-  style,
+  className = "",
 }: NavigationButtonProps) => {
+  const baseStyles = "py-4 px-6 rounded-lg items-center justify-center my-2";
+  const variants: Record<string, string> = {
+    primary: "bg-blue-500",
+    secondary: "bg-transparent border-2 border-blue-500",
+    danger: "bg-red-500",
+  };
+
+  const textColor = variant === "secondary" ? "text-blue-500" : "text-white";
+
   return (
     <TouchableOpacity
-      style={[styles.button, styles[variant], style]}
+      className={`${baseStyles} ${variants[variant]} ${className}`}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Text
-        style={[styles.text, variant === "secondary" && styles.textSecondary]}
-      >
+      <Text className={`text-base font-semibold ${textColor}`}>
         {title}
       </Text>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 8,
-  },
-  primary: {
-    backgroundColor: "#3498db",
-  },
-  secondary: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#3498db",
-  },
-  danger: {
-    backgroundColor: "#e74c3c",
-  },
-  text: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  textSecondary: {
-    color: "#3498db",
-  },
-});

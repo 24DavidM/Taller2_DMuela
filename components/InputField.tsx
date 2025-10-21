@@ -1,46 +1,55 @@
 import React from "react";
-import { View, Text, TextInput, StyleSheet, TextInputProps, TextStyle, TouchableOpacity } from "react-native";
+import { TextInput, Text, View, TextInputProps, TouchableOpacity } from "react-native";
 
 interface InputFieldProps extends TextInputProps {
   label: string;
   error?: string;
-  multiline?: boolean;
-  numberOfLines?: number;
-  inputStyle?: TextStyle;
+  inputStyle?: object;
+  onFocusCustom?: () => void;
   editable?: boolean;
-  onFocusCustom?: () => void; // <-- para el calendario
 }
 
 export const InputField = ({
   label,
   error,
-  multiline = false,
-  numberOfLines,
   inputStyle,
   onFocusCustom,
+  editable = true,
   ...props
 }: InputFieldProps) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity activeOpacity={1} onPress={onFocusCustom} disabled={!onFocusCustom}>
+    <View className="mb-4">
+      <Text className="text-base font-semibold text-gray-800 mb-2">{label}</Text>
+
+      {editable ? (
         <TextInput
-          style={[styles.input, error && styles.inputError, inputStyle]}
           placeholderTextColor="#999"
-          multiline={multiline}
-          numberOfLines={numberOfLines}
           {...props}
+          className="rounded-lg p-3 text-base bg-white border"
+          style={[
+            { borderColor: error ? "#e74c3c" : "#d1d5db" },
+            inputStyle,
+          ]}
         />
-      </TouchableOpacity>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      ) : (
+        <TouchableOpacity onPress={onFocusCustom} activeOpacity={0.7}>
+          <TextInput
+            placeholderTextColor="#999"
+            {...props}
+            editable={false}
+            className="rounded-lg p-3 text-base bg-white border"
+            style={[
+              { borderColor: error ? "#e74c3c" : "#d1d5db" },
+              inputStyle,
+            ]}
+            pointerEvents="none" 
+          />
+        </TouchableOpacity>
+      )}
+
+      {error && (
+        <Text style={{color:"red", fontSize:10}}>{error}</Text>
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { marginBottom: 16 },
-  label: { fontSize: 16, fontWeight: "600", color: "#333", marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: "#fff" },
-  inputError: { borderColor: "#e74c3c" },
-  errorText: { color: "#e74c3c", fontSize: 12, marginTop: 4 },
-});

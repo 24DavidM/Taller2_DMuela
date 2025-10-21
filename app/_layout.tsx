@@ -1,5 +1,6 @@
-// app/_layout.tsx
 
+import "../global.css"; 
+// STALIN DAVID MUELA SANGUCHO
 import { Stack } from "expo-router";
 import { CVProvider } from "../context/CVContext";
 

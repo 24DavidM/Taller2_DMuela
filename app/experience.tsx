@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  Platform,
-} from "react-native";
+import { View, Text, ScrollView, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useForm } from "react-hook-form";
@@ -26,7 +19,7 @@ export default function ExperienceScreen() {
   const router = useRouter();
   const { cvData, addExperience, deleteExperience } = useCVContext();
 
-  const { control, handleSubmit, setValue, watch } = useForm<FormData>({
+  const { control, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       company: "",
       position: "",
@@ -39,62 +32,13 @@ export default function ExperienceScreen() {
   const [pickerField, setPickerField] = useState<"startDate" | "endDate" | null>(null);
   const [pickerDate, setPickerDate] = useState(new Date());
 
-  const onSubmit = (data: FormData) => {
-    // Validación fechas
-    const today = new Date();
-
-    if (!data.startDate) {
-      Alert.alert("Error", "La fecha de inicio es obligatoria.");
-      return;
-    }
-
-    const [startMonth, startYear] = data.startDate.split(" ");
-    const start = new Date(parseInt(startYear), monthNames.indexOf(startMonth));
-
-    if (start > today) {
-      Alert.alert("Error", "La fecha de inicio no puede ser futura.");
-      return;
-    }
-
-    if (data.endDate) {
-      const [endMonth, endYear] = data.endDate.split(" ");
-      const end = new Date(parseInt(endYear), monthNames.indexOf(endMonth));
-
-      if (end > today) {
-        Alert.alert("Error", "La fecha de fin no puede ser futura.");
-        return;
-      }
-
-      if (end < start) {
-        Alert.alert("Error", "La fecha de fin no puede ser anterior a la fecha de inicio.");
-        return;
-      }
-    }
-
-    // Guardar experiencia
-    addExperience({ id: Date.now().toString(), ...data });
-    Alert.alert("Éxito", "Experiencia agregada correctamente");
-
-    // Limpiar formulario
-    setValue("company", "");
-    setValue("position", "");
-    setValue("startDate", "");
-    setValue("endDate", "");
-    setValue("description", "");
-  };
-
-  const handleDelete = (id: string) => {
-    Alert.alert("Confirmar", "¿Estás seguro de eliminar esta experiencia?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Eliminar", style: "destructive", onPress: () => deleteExperience(id) },
-    ]);
-  };
-
+  // Función para abrir DatePicker
   const openPicker = (field: "startDate" | "endDate") => {
     setPickerField(field);
     setPickerDate(new Date());
   };
 
+  // Función que maneja la selección de la fecha
   const onDateChange = (event: any, selectedDate?: Date) => {
     if (event.type === "dismissed") {
       setPickerField(null);
@@ -108,11 +52,69 @@ export default function ExperienceScreen() {
     }
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Agregar Nueva Experiencia</Text>
+  // Función para agregar experiencia
+  const onSubmit = (data: FormData) => {
+    const today = new Date();
 
+    if (!data.startDate) {
+      alert("La fecha de inicio es obligatoria.");
+      return;
+    }
+
+    const [startMonth, startYear] = data.startDate.split(" ");
+    const start = new Date(parseInt(startYear), monthNames.indexOf(startMonth));
+
+    if (start > today) {
+      alert("La fecha de inicio no puede ser futura.");
+      return;
+    }
+
+    if (data.endDate) {
+      const [endMonth, endYear] = data.endDate.split(" ");
+      const end = new Date(parseInt(endYear), monthNames.indexOf(endMonth));
+
+      if (end > today) {
+        alert("La fecha de fin no puede ser futura.");
+        return;
+      }
+
+      if (end < start) {
+        alert("La fecha de fin no puede ser anterior a la fecha de inicio.");
+        return;
+      }
+    }
+
+    addExperience({ id: Date.now().toString(), ...data });
+    alert("Experiencia agregada correctamente");
+
+    // Limpiar campos
+    setValue("company", "");
+    setValue("position", "");
+    setValue("startDate", "");
+    setValue("endDate", "");
+    setValue("description", "");
+  };
+
+  // Función para eliminar experiencia con alerta
+  const handleDeleteExperience = (id: string) => {
+    Alert.alert(
+      "Eliminar Experiencia",
+      "¿Estás seguro de eliminar esta experiencia?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Eliminar", style: "destructive", onPress: () => deleteExperience(id) },
+      ]
+    );
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="p-5">
+        <Text className="text-2xl font-bold text-slate-800 mb-4">
+          Agregar Nueva Experiencia
+        </Text>
+
+        {/* Inputs */}
         <ValidatedInput
           name="company"
           control={control}
@@ -124,6 +126,7 @@ export default function ExperienceScreen() {
             pattern: { value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, message: "Solo se permiten letras y espacios" }
           }}
         />
+
         <ValidatedInput
           name="position"
           control={control}
@@ -165,6 +168,7 @@ export default function ExperienceScreen() {
           rules={{ maxLength: { value: 250, message: "Máximo 250 caracteres" } }}
         />
 
+        {/* Date Picker */}
         {pickerField && (
           <DateTimePicker
             value={pickerDate}
@@ -174,21 +178,38 @@ export default function ExperienceScreen() {
           />
         )}
 
-        <NavigationButton title="Agregar Experiencia" onPress={handleSubmit(onSubmit)} />
+        {/* Botones */}
+        <NavigationButton
+          title="Agregar Experiencia"
+          onPress={handleSubmit(onSubmit)}
+        />
 
         {cvData.experiences.length > 0 && (
           <>
-            <Text style={styles.listTitle}>Experiencias Agregadas</Text>
+            <Text className="text-xl font-semibold text-slate-800 mt-6 mb-3">
+              Experiencias Agregadas
+            </Text>
+
             {cvData.experiences.map((exp) => (
-              <View key={exp.id} style={styles.card}>
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>{exp.position}</Text>
-                  <Text style={styles.cardSubtitle}>{exp.company}</Text>
-                  <Text style={styles.cardDate}>
-                    {exp.startDate} - {exp.endDate || "Actual"}
-                  </Text>
-                  {exp.description ? <Text>{exp.description}</Text> : null}
-                </View>
+              <View key={exp.id} className="bg-white rounded-xl p-4 mb-3 shadow">
+                <Text className="text-base font-semibold text-slate-800 mb-1">
+                  {exp.position}
+                </Text>
+                <Text className="text-sm text-gray-500 mb-1">{exp.company}</Text>
+                <Text className="text-xs text-gray-400 mb-1">
+                  {exp.startDate} - {exp.endDate || "Actual"}
+                </Text>
+                {exp.description && (
+                  <Text className="text-sm text-gray-600">{exp.description}</Text>
+                )}
+
+                {/* Botón eliminar */}
+                <NavigationButton
+                  title="Eliminar"
+                  onPress={() => handleDeleteExperience(exp.id)}
+                  variant="danger"
+                  className="mt-3"
+                />
               </View>
             ))}
           </>
@@ -198,75 +219,9 @@ export default function ExperienceScreen() {
           title="Volver"
           onPress={() => router.back()}
           variant="secondary"
-          style={{ marginTop: 16 }}
+          className="mt-4 mb-8"
         />
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  content: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 16,
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#2c3e50",
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: "row",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#2c3e50",
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: "#7f8c8d",
-    marginBottom: 4,
-  },
-  cardDate: {
-    fontSize: 12,
-    color: "#95a5a6",
-  },
-  deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#e74c3c",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});

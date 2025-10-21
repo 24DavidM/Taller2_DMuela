@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { ValidatedInput } from "../components/ValidatedInput";
@@ -17,14 +17,14 @@ export default function PersonalInfoScreen() {
 
   const onSubmit = (data: PersonalInfo) => {
     updatePersonalInfo(data);
-    Alert.alert("Éxito", "Información guardada correctamente", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+    alert("Información guardada correctamente");
+    router.back();
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="p-5 space-y-4">
+
         {/* Nombre completo */}
         <ValidatedInput
           name="fullName"
@@ -87,23 +87,23 @@ export default function PersonalInfoScreen() {
           label="Resumen Profesional"
           placeholder="Describe brevemente tu perfil profesional..."
           numberOfLines={4}
-          inputStyle={{ height: 100, textAlignVertical: "top" }} 
+          inputStyle={{ height: 100, textAlignVertical: "top" }}
           rules={{ maxLength: { value: 250, message: "Máximo 250 caracteres" } }}
         />
 
-        <NavigationButton title="Guardar Información" onPress={handleSubmit(onSubmit)} />
+        <NavigationButton
+          title="Guardar Información"
+          onPress={handleSubmit(onSubmit)}
+          className="mb-4"
+        />
 
         <NavigationButton
           title="Cancelar"
           onPress={() => router.back()}
           variant="secondary"
+          className="mb-10"
         />
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  content: { padding: 20 },
-});

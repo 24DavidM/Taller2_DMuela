@@ -1,15 +1,20 @@
-// app/skill.tsx
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useForm } from 'react-hook-form';
-import { Picker } from '@react-native-picker/picker';
-import { useCVContext } from '@/context/CVContext';
-import { LevelSkill, Skill } from '@/types/cv.types';
-import { NavigationButton } from '@/components/NavigationButton';
-import { ValidatedInput } from '@/components/ValidatedInput';
+import React from "react";
+import {
+    View,
+    Text,
+    ScrollView,
+    TouchableOpacity,
+    Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useForm } from "react-hook-form";
+import { Picker } from "@react-native-picker/picker";
+import { useCVContext } from "@/context/CVContext";
+import { LevelSkill, Skill } from "@/types/cv.types";
+import { NavigationButton } from "@/components/NavigationButton";
+import { ValidatedInput } from "@/components/ValidatedInput";
 
-type SkillForm = Omit<Skill, 'id'>;
+type SkillForm = Omit<Skill, "id">;
 
 export default function SkillScreen() {
     const router = useRouter();
@@ -17,57 +22,63 @@ export default function SkillScreen() {
 
     const { control, handleSubmit, setValue, watch } = useForm<SkillForm>({
         defaultValues: {
-            name: '',
+            name: "",
             level: LevelSkill.BASIC,
         },
     });
 
     const onSubmit = (data: SkillForm) => {
         addSkill({ id: Date.now().toString(), ...data });
-        Alert.alert('Éxito', 'Habilidad agregada correctamente');
-        setValue('name', '');
-        setValue('level', LevelSkill.BASIC);
+        Alert.alert("Éxito", "Habilidad agregada correctamente");
+        setValue("name", "");
+        setValue("level", LevelSkill.BASIC);
     };
 
     const handleDelete = (id: string) => {
-        Alert.alert('Confirmar', '¿Estás seguro de eliminar esta habilidad?', [
-            { text: 'Cancelar', style: 'cancel' },
-            { text: 'Eliminar', style: 'destructive', onPress: () => deleteSkill(id) },
+        Alert.alert("Confirmar", "¿Estás seguro de eliminar esta habilidad?", [
+            { text: "Cancelar", style: "cancel" },
+            { text: "Eliminar", style: "destructive", onPress: () => deleteSkill(id) },
         ]);
     };
 
-    const selectedLevel = watch('level');
+    const selectedLevel = watch("level");
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-            <View style={styles.content}>
-                <Text style={styles.sectionTitle}>Agregar Nuevas Habilidades</Text>
+        <ScrollView className="flex-1 bg-gray-100">
+            <View className="p-5">
+                <Text className="text-2xl font-bold text-slate-800 mb-4">
+                    Agregar Nuevas Habilidades
+                </Text>
 
                 {/* Formulario */}
-                <View style={styles.formSection}>
+                <View className="mb-6">
                     <ValidatedInput
                         name="name"
                         control={control}
                         label="Nombre de la Habilidad *"
                         placeholder="Ej. JavaScript, React, etc."
                         rules={{
-                            required: 'El nombre de la habilidad es obligatorio',
+                            required: "El nombre de la habilidad es obligatorio",
                             pattern: {
                                 value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
-                                message: 'Solo se permiten letras y espacios',
+                                message: "Solo se permiten letras y espacios",
                             },
                             maxLength: {
                                 value: 50,
-                                message: 'Máximo 50 caracteres',
+                                message: "Máximo 50 caracteres",
                             },
                         }}
                     />
 
-                    <Text style={styles.textoStyle}>Nivel:</Text>
-                    <View style={styles.pickerContainer}>
+                    <Text className="text-base font-semibold text-gray-800 mb-2">
+                        Nivel:
+                    </Text>
+                    <View className="border border-gray-300 rounded-lg bg-white mb-4">
                         <Picker
                             selectedValue={selectedLevel}
-                            onValueChange={(itemValue) => setValue('level', itemValue as LevelSkill)}
+                            onValueChange={(itemValue) =>
+                                setValue("level", itemValue as LevelSkill)
+                            }
                         >
                             {Object.values(LevelSkill).map((nivel) => (
                                 <Picker.Item key={nivel} label={nivel} value={nivel} />
@@ -81,20 +92,33 @@ export default function SkillScreen() {
                 {/* Lista de habilidades */}
                 {cvData.skills.length > 0 ? (
                     <>
-                        <Text style={styles.sectionTitle}>Habilidades Agregadas</Text>
-                        <View style={styles.cardsContainer}>
+                        <Text className="text-2xl font-bold text-slate-800 mb-4">
+                            Habilidades Agregadas
+                        </Text>
+
+                        <View className="flex-row flex-wrap justify-between">
                             {cvData.skills.map((skill) => (
-                                <View key={skill.id} style={styles.card}>
-                                    <View style={styles.cardContent}>
-                                        <Text style={styles.cardTitle}>{skill.name}</Text>
-                                        <Text style={styles.cardSubtitle}>Nivel: {skill.level}</Text>
+                                <View
+                                    key={skill.id}
+                                    className="bg-white rounded-lg p-4 mb-3 w-[48%] shadow"
+                                >
+                                    <View className="mb-2">
+                                        <Text className="text-lg font-semibold text-slate-800">
+                                            {skill.name}
+                                        </Text>
+                                        <Text className="text-base text-slate-700">
+                                            Nivel: {skill.level}
+                                        </Text>
                                     </View>
-                                    <View style={styles.cardButtons}>
+
+                                    <View className="flex-row">
                                         <TouchableOpacity
                                             onPress={() => handleDelete(skill.id)}
-                                            style={styles.deleteButton}
+                                            className="bg-blue-500 px-4 py-1.5 rounded-md"
                                         >
-                                            <Text style={styles.deleteButtonText}>Eliminar</Text>
+                                            <Text className="text-white text-xs font-bold">
+                                                Eliminar
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -102,71 +126,13 @@ export default function SkillScreen() {
                         </View>
                     </>
                 ) : (
-                    <Text>No has agregado habilidades aún.</Text>
+                    <Text className="text-gray-600 text-center mb-4">
+                        No has agregado habilidades aún.
+                    </Text>
                 )}
 
-                <NavigationButton
-                    title="Volver"
-                    onPress={() => router.back()}
-                    variant="secondary"
-                />
+                <NavigationButton title="Volver" onPress={() => router.back()} variant="secondary" />
             </View>
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    content: { padding: 20 },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#2c3e50',
-        marginBottom: 16,
-    },
-    formSection: { marginBottom: 20 },
-    textoStyle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 8,
-    },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        backgroundColor: '#fff',
-        marginBottom: 16,
-    },
-    cardsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-        width: '48%',
-    },
-    deleteButton: {
-        backgroundColor: '#63a2ffff',
-        paddingVertical: 6,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-    },
-    deleteButtonText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    cardContent: { marginBottom: 5 },
-    cardTitle: { fontSize: 17, fontWeight: '600', color: '#2c3e50' },
-    cardSubtitle: { fontSize: 15, color: '#2c3e50', paddingBottom: 5 },
-    cardButtons: { flexDirection: 'row' },
-});

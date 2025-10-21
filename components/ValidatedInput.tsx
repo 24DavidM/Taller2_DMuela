@@ -14,7 +14,7 @@ interface ValidatedInputProps {
     keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
     inputStyle?: TextStyle;
     editable?: boolean;
-    onFocus?: () => void; // este será onFocusCustom
+    onFocus?: () => void; 
 }
 
 export const ValidatedInput: React.FC<ValidatedInputProps> = ({
@@ -48,7 +48,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
                     keyboardType={keyboardType}
                     inputStyle={inputStyle}
                     editable={editable}
-                    onFocusCustom={onFocus} // <-- aquí
+                    onFocusCustom={onFocus}
                 />
             )}
         />
